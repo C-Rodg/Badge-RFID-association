@@ -1,18 +1,38 @@
 <ion-header>
-  <ion-navbar>
+  <ion-navbar color="p-primary-dark" padding-top>
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>Home</ion-title>
+    <ion-title>Associate Badge</ion-title>
+    <ion-buttons end class="navbar-btns">
+      <button ion-button icon-only (tap)="resetScans()">
+        <ion-icon name="refresh"></ion-icon>
+      </button>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
-  <h3>Ionic Menu Starter</h3>
-
-  <p>
-    If you get lost, the <a href="http://ionicframework.com/docs/v2">docs</a> will show you the way.
-  </p>
-
-  <button ion-button secondary menuToggle>Toggle Menu</button>
+<ion-content>
+  <div class="status-container">
+    <div class="status-container-box complete" [ngClass]="{'complete': (scanBadge && scanRFID), 'scanned': scanBadge}">
+      <h1 class="status-text">
+        <ion-icon name="ios-close-circle-outline" *ngIf="!scanBadge"></ion-icon>
+        <ion-icon name="md-checkmark-circle-outline" *ngIf="scanBadge"></ion-icon>
+        <span>Badge ID</span>
+      </h1>
+    </div>
+    <div class="status-container-box" [ngClass]="{'complete': (scanBadge && scanRFID), 'scanned': scanRFID}">
+     <h1 class="status-text">
+       <ion-icon name="ios-close-circle-outline" *ngIf="!scanRFID"></ion-icon>
+       <ion-icon name="md-checkmark-circle-outline" *ngIf="scanRFID"></ion-icon>
+       <span>RFID tag</span>
+     </h1>
+    </div>
+  </div>
 </ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <button color="p-primary" ion-button large block (tap)="startScan()">Scan</button>
+  </ion-toolbar>
+</ion-footer>

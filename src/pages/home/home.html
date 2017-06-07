@@ -14,20 +14,26 @@
 
 <ion-content>
   <div class="status-container">
-    <div class="status-container-box complete" [ngClass]="{'complete': (scanBadge && scanRFID), 'scanned': scanBadge}">
+    <div class="status-container-box" [ngClass]="{'complete-badge': (scanBadge && scanRFID), 'scanned': scanBadge}">     
       <h1 class="status-text">
         <ion-icon name="ios-close-circle-outline" *ngIf="!scanBadge"></ion-icon>
         <ion-icon name="md-checkmark-circle-outline" *ngIf="scanBadge"></ion-icon>
         <span>Badge ID</span>
       </h1>
     </div>
-    <div class="status-container-box" [ngClass]="{'complete': (scanBadge && scanRFID), 'scanned': scanRFID}">
+    <div class="status-container-box" [ngClass]="{'complete-rfid': (scanBadge && scanRFID), 'scanned': scanRFID}">
      <h1 class="status-text">
        <ion-icon name="ios-close-circle-outline" *ngIf="!scanRFID"></ion-icon>
        <ion-icon name="md-checkmark-circle-outline" *ngIf="scanRFID"></ion-icon>
-       <span>RFID tag</span>
+       <span>Wireless tag</span>
      </h1>
-    </div>
+    </div> 
+    <div class="success-box" [ngClass]="{'show-success': (scanBadge && scanRFID)}">
+      <div class="success-wrapper">
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>
+        <h1>Associated!</h1>
+      </div>
+    </div>   
   </div>
 </ion-content>
 

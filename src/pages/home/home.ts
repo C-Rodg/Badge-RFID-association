@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { SoundService } from '../../providers/soundService';
 
 @Component({
   selector: 'page-home',
@@ -11,7 +12,7 @@ export class HomePage {
   valueBadge: string = "";
   valueRFID: string = "";
 
-  constructor() {
+  constructor(private soundService: SoundService) {
 
   }
 
@@ -22,6 +23,13 @@ export class HomePage {
       this.scanBadge = true;
     } else {
       this.scanRFID = true;
+    }
+
+    if (this.scanBadge && this.scanRFID) {
+      this.soundService.playAccepted();
+      setTimeout(function(){
+        this.resetScans();
+      }.bind(this), 3000);
     }
   }
 

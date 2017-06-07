@@ -1,5 +1,7 @@
 page-home {
     
+    $curve: cubic-bezier(0.650, 0.000, 0.450, 1.000);
+
     .navbar-btns {
         button {
             margin-right: 12px;
@@ -7,6 +9,7 @@ page-home {
     }
 
     .status-container {
+        position: relative;
         margin-top: 5px;
         display: flex;
         flex-direction: column;
@@ -23,6 +26,7 @@ page-home {
                 text-align: center;
                 color: color($colors, p-danger);
                 font-size: 5rem;
+                font-weight: 300;
 
                 ion-icon {
                     font-size: 1.9em;
@@ -39,18 +43,16 @@ page-home {
             }
         }
 
-        .status-container-box.complete {
-            &:first-child {
-                border-bottom-color: transparent;
-
-                h1 {
-                    animation: 0.4s ease-in-out fadeDown forwards;
-                }
+        .status-container-box.complete-badge {
+            border-bottom-color: color($colors, p-primary);
+            h1 {
+                animation: 0.4s ease-in-out fadeDown forwards;
             }
-            &:last-child {
-                h1 {
-                    animation: 0.4s ease-in-out fadeUp forwards;
-                }
+        }
+
+        .status-container-box.complete-rfid {
+            h1 {
+                animation: 0.4s ease-in-out fadeUp forwards;
             }
         }
 
@@ -61,6 +63,72 @@ page-home {
                 color: #fff;
             }
         }
+
+        .success-box {            
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            text-align: center;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;    
+            opacity: 0;    
+
+            h1 {
+                margin: 10px 0 0 0;
+                font-size: 3.9rem;
+                font-weight: 300;
+            }
+
+            &.show-success {
+                animation: 0.2s ease-in fadeIn forwards;
+                animation-delay:0.2s;                
+
+                .checkmark__circle {
+                    stroke-dasharray: 166;
+                    stroke-dashoffset: 166;
+                    stroke-width: 3;
+                    stroke-miterlimit: 10;
+                    stroke: #fff;
+                    fill: none; 
+                    animation: stroke .6s $curve forwards;
+                }
+
+                .checkmark {
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    display: block;
+                    stroke-width: 3;
+                    stroke: color($colors, p-primary);
+                    stroke-miterlimit: 10;
+                    margin: 5px auto;
+                    box-shadow: inset 0px 0px 0px #fff;
+                    animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+                }
+
+                .checkmark__check {
+                    transform-origin: 50% 50%;
+                    stroke-dasharray: 68; /*48*/
+                    stroke-dashoffset: 68;/*48*/
+                    animation: stroke .3s $curve .8s forwards;
+                }   
+            }            
+        }
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
     }
 }
 
@@ -83,3 +151,24 @@ page-home {
         transform: translate3d(0,100px,0);
     }
 }
+
+@keyframes stroke {
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes scale {
+  0%, 100% {
+    transform: none;
+  }
+  50% {
+    transform: scale3d(1.1, 1.1, 1);
+  }
+}
+
+@keyframes fill {
+  100% {
+    box-shadow: inset 0px 0px 0px 40px #fff; 
+  }
+} 

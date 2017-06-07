@@ -18,18 +18,21 @@ export class HomePage {
 
   startScan() {
     // TESTING:
-    let val = Math.round(Math.random());
-    if (val) {
+    if (!this.scanBadge) {
       this.scanBadge = true;
+      this.soundService.playScan();
     } else {
       this.scanRFID = true;
+      this.soundService.playScan();
     }
 
     if (this.scanBadge && this.scanRFID) {
-      this.soundService.playAccepted();
+      setTimeout(function() {
+        this.soundService.playAccepted();
+      }.bind(this), 800);      
       setTimeout(function(){
         this.resetScans();
-      }.bind(this), 3000);
+      }.bind(this), 2000);
     }
   }
 

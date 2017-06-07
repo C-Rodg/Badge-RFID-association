@@ -16,9 +16,9 @@ import { SoundService } from '../providers/soundService';
   ],
   imports: [
     BrowserModule,
-    IonicModule.forRoot(MyApp, {
-      mode: 'md'
-    }),
+    IonicModule.forRoot(MyApp, 
+      { mode: 'md'}
+    ),
   ],
   bootstrap: [IonicApp],
   entryComponents: [

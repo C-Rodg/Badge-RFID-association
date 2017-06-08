@@ -7,6 +7,7 @@ import { HomePage } from '../pages/home/home';
 import { SettingsPage } from '../pages/settings/settings';
 
 import { SoundService } from '../providers/soundService';
+import { ScanSledService } from '../providers/scanSledService';
 
 @NgModule({
   declarations: [
@@ -28,6 +29,7 @@ import { SoundService } from '../providers/soundService';
   ],
   providers: [
     SoundService,
+    ScanSledService,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })

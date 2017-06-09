@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { SoundService } from '../../providers/soundService';
+import { ScanSledService } from '../../providers/scanSledService';
 
 @Component({
   selector: 'page-home',
@@ -12,8 +13,35 @@ export class HomePage {
   valueBadge: string = "";
   valueRFID: string = "";
 
-  constructor(private soundService: SoundService) {
+  constructor(
+    private scanSledService: ScanSledService,
+    private soundService: SoundService,
+    private zone: NgZone,
+  ) {
 
+  }
+
+  ionViewWillEnter() {
+
+  }
+
+  // Bind OnDataRead to component, enable sled scanning
+  ionViewDidEnter() {
+    (<any>window).OnDataRead = this.onScan.bind(this);
+    this.scanSledService.sendScanCommand('enableButtonScan');
+  }
+
+  // Disallow scanning on other pages
+  ionViewDidLeave() {
+    (<any>window).OnDataRead = function() {};
+  }
+
+  // Scan Registered
+  onScan(data) {
+    let scanData = data;
+    this.zone.run(() => {
+      // Determine if badgeId or wireless device, if both scanned associate and save
+    });
   }
 
   startScan() {

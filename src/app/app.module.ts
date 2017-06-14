@@ -10,6 +10,7 @@ import { SettingsPage } from '../pages/settings/settings';
 import { InfoService } from '../providers/infoService';
 import { SoundService } from '../providers/soundService';
 import { ScanSledService } from '../providers/scanSledService';
+import { ParseBadgeService } from '../providers/parseBadgeService';
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { ScanSledService } from '../providers/scanSledService';
     InfoService,
     SoundService,
     ScanSledService,
+    ParseBadgeService,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })

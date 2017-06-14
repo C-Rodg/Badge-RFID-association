@@ -1,6 +1,7 @@
 import { Component, NgZone } from '@angular/core';
 import { SoundService } from '../../providers/soundService';
 import { ScanSledService } from '../../providers/scanSledService';
+import { ParseBadgeService } from '../../providers/parseBadgeService';
 
 @Component({
   selector: 'page-home',
@@ -15,6 +16,7 @@ export class HomePage {
 
   constructor(
     private scanSledService: ScanSledService,
+    private parseBadgeService: ParseBadgeService,
     private soundService: SoundService,
     private zone: NgZone,
   ) {
@@ -41,9 +43,31 @@ export class HomePage {
     let scanData = data;
     this.zone.run(() => {
       // Determine if badgeId or wireless device, if both scanned associate and save
+      alert(JSON.stringify(data));
+      this.parseBadgeService.parse(data).subscribe((d) => {
+        alert(JSON.stringify(d));
+      })
     });
   }
 
+  // Scan Button touch start/end
+  scanBtnClicked(event, status) {
+    if (status) {
+      this.scanSledService.sendScanCommand('startScan');
+    } else {
+      this.scanSledService.sendScanCommand('stopScan');
+    }
+  }
+
+  // Reset RFID & BadgeID values
+  resetScans() {
+    this.scanBadge = false;
+    this.scanRFID = false;
+    this.valueBadge = "";
+    this.valueRFID = "";
+  }  
+
+  // TESTING -- CAN DELETE
   startScan() {
     // TESTING:
     if (!this.scanBadge) {
@@ -62,14 +86,6 @@ export class HomePage {
         this.resetScans();
       }.bind(this), 2000);
     }
-  }
-
-  // Reset RFID & BadgeID values
-  resetScans() {
-    this.scanBadge = false;
-    this.scanRFID = false;
-    this.valueBadge = "";
-    this.valueRFID = "";
-  }
+  }  
 
 }

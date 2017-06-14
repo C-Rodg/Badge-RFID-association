@@ -39,6 +39,6 @@
 
 <ion-footer>
   <ion-toolbar>
-    <button color="p-primary" ion-button large block (tap)="startScan()">Scan</button>
+    <button color="p-primary" ion-button large block (touchstart)="scanBtnClicked($event, true)" (touchend)="scanBtnClicked($event, false)">Scan</button>
   </ion-toolbar>
 </ion-footer>

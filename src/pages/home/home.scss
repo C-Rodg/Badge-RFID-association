@@ -8,63 +8,7 @@ page-home {
         }
     }
 
-    .status-container {
-        position: relative;
-        margin-top: 5px;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-
-        .status-container-box {
-            height: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            h1 {
-                margin: 0;  
-                text-align: center;
-                color: color($colors, p-danger);
-                font-size: 5rem;
-                font-weight: 300;
-
-                ion-icon {
-                    font-size: 1.9em;
-                }
-
-                ion-icon,
-                span {
-                    display: block;
-                }              
-            }
-
-            &:first-child {
-                border-bottom: 1px solid color($colors, white-divider);
-            }
-        }
-
-        .status-container-box.complete-badge {
-            border-bottom-color: color($colors, p-primary);
-            h1 {
-                animation: 0.4s ease-in-out fadeDown forwards;
-            }
-        }
-
-        .status-container-box.complete-rfid {
-            h1 {
-                animation: 0.4s ease-in-out fadeUp forwards;
-            }
-        }
-
-        .status-container-box.scanned {
-            background-color: color($colors, p-primary);
-
-            h1 {
-                color: #fff;
-            }
-        }
-
-        .success-box {            
+    .success-box {            
             position: absolute;
             top: 0;
             left: 0;
@@ -120,6 +64,148 @@ page-home {
                 }   
             }            
         }
+
+    .camera-controls {
+        display: flex;
+
+        button {
+            flex-grow: 1;
+
+            ion-icon {
+                padding-left: 0.4em;
+            }
+        }
+    }
+
+    .camera-container {
+        position: relative;
+        display: flex;
+        height: 100%;
+        flex-direction: row;
+        align-items: flex-end;
+
+        .success-box {
+            align-items: flex-end;
+
+            h1 {
+                font-size: 2.4rem;
+                margin-top: 0;
+                margin-bottom: 4px;
+            }
+
+            .checkmark__circle {
+                stroke-dasharray: 166;
+                stroke-dashoffset: 166;
+            }
+        }
+        
+        .camera-status {
+            width: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 1px solid color($colors, white-divider);
+
+            h1 {
+                text-align: center;
+                color: color($colors, p-danger);
+                font-size: 3rem;
+                font-weight: 300;
+
+                ion-icon {
+                    font-size: 1.9em;
+                }
+
+                span {
+                    display: block;
+                }
+            }
+
+            &:first-child {
+                border-right: 1px solid color($colors, white-divider);
+            }
+        }
+
+        .camera-status.scanned {
+            background-color: color($colors, p-primary);
+            border-right: 0;
+
+            h1 {
+                color: #fff;
+            }
+        }
+
+        .camera-status.complete-badge {
+            h1 {
+                animation: 0.4s ease-in-out fadeRight forwards;
+            }
+        }
+
+        .camera-status.complete-rfid {
+            h1 {
+                animation: 0.4s ease-in-out fadeLeft forwards;
+            }
+        }
+    }
+
+    .status-container {
+        position: relative;
+        margin-top: 5px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        height: calc(100% - 5px);
+
+        .status-container-box {
+            height: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            h1 {
+                margin: 0;  
+                text-align: center;
+                color: color($colors, p-danger);
+                font-size: 5rem;
+                font-weight: 300;
+
+                ion-icon {
+                    font-size: 1.9em;
+                }
+
+                ion-icon,
+                span {
+                    display: block;
+                }              
+            }
+
+            &:first-child {
+                border-bottom: 1px solid color($colors, white-divider);
+            }
+        }
+
+        .status-container-box.complete-badge {
+            border-bottom-color: color($colors, p-primary);
+            h1 {
+                animation: 0.4s ease-in-out fadeDown forwards;
+            }
+        }
+
+        .status-container-box.complete-rfid {
+            h1 {
+                animation: 0.4s ease-in-out fadeUp forwards;
+            }
+        }
+
+        .status-container-box.scanned {
+            background-color: color($colors, p-primary);
+
+            h1 {
+                color: #fff;
+            }
+        }
+
+
     }
 }
 
@@ -149,6 +235,26 @@ page-home {
     100% {
         opacity: 0;
         transform: translate3d(0,100px,0);
+    }
+}
+
+@keyframes fadeLeft {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(-80px,0,0);
+    }
+}
+
+@keyframes fadeRight {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(80px,0,0);
     }
 }
 

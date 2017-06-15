@@ -10,7 +10,7 @@ export class ScanCameraService {
         top: 62,
         left: 0,
         width: 320,
-        height: 456
+        height: 320
     };
     private endpoint : string = "http://localhost/barcodecontrol";
     private cameraOn : boolean = false;
@@ -28,19 +28,21 @@ export class ScanCameraService {
     calculatePosition() {
         const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
         this.camera.width = width;
-        const target = document.getElementById('status-container');
-        if (target) {
-            const coords = target.getBoundingClientRect();
-            if (coords) {
-                this.camera.top = coords.top + 20;
-                this.camera.height = coords.height;
+        const target = document.getElementById('camera-container');
+        const cameraStatus = document.getElementById('first-camera');
+        if (target && cameraStatus) {
+            const topCoords = target.getBoundingClientRect();
+            const botCoords = cameraStatus.getBoundingClientRect();
+            if (topCoords) {
+                this.camera.top = topCoords.top + 5;
+                this.camera.height = botCoords.top - topCoords.top - 10;
             } else {
                 this.camera.top = 62;
-                this.camera.height = 300;
+                this.camera.height = 320;
             }
         } else {
             this.camera.top = 62;
-            this.camera.height = 300;
+            this.camera.height = 320;
         }
 
         if (this.cameraOn) {

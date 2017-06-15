@@ -1,9 +1,12 @@
 import { Component, ViewChild, NgZone } from '@angular/core';
-import { Nav } from 'ionic-angular';
+import { Nav, AlertController } from 'ionic-angular';
 
 import { HomePage } from '../pages/home/home';
 import { SettingsPage } from '../pages/settings/settings';
 import { InfoService } from '../providers/infoService';
+import { SettingsService } from '../providers/settingsService';
+import { ScanCameraService } from '../providers/scanCameraService';
+import { ScanSledService } from '../providers/scanSledService';
 
 @Component({
   templateUrl: 'app.html'
@@ -17,6 +20,10 @@ export class MyApp {
 
   constructor(
       private infoService: InfoService,
+      private settingsService: SettingsService,
+      private scanCameraService: ScanCameraService,
+      private scanSledService: ScanSledService,
+      private alertCtrl: AlertController,
       private zone: NgZone
     ) {
 
@@ -47,7 +54,36 @@ export class MyApp {
   onZoneOnAppActive() {
     this.zone.run(() => {
       this.infoService.getClientInfo().subscribe(() => {
-
+        let view = this.nav.getActive();
+        if (this.settingsService.cameraMode) {
+          if (view.instance instanceof HomePage) {
+            this.scanCameraService.turnOff();
+          }          
+          let prompt = this.alertCtrl.create({
+            title: 'Scanner Detected',
+            message: 'Do you wish to shut off the camera and switch to sled mode?',
+            buttons: [
+              {
+                text: 'Stay',
+                handler: () => {
+                  if (view.instance instanceof HomePage) {
+                    this.scanCameraService.turnOn();
+                  }
+                }
+              },
+              {
+                text: 'Switch',
+                handler: () => {
+                  this.settingsService.setValue(false, 'cameraMode');
+                  if (view.instance instanceof HomePage) {
+                    this.scanSledService.sendScanCommand('enableButtonScan');
+                  }
+                }
+              }
+            ]
+          });
+          prompt.present();
+        }
       });
     })
   }
@@ -55,5 +91,23 @@ export class MyApp {
   // Side Menu - Open Page
   openPage(page) {
     this.nav.setRoot(page.component);
+  }
+
+  // Side Menu Open
+  sideMenuOpen() {
+    if (this.settingsService.cameraMode) {
+      this.scanCameraService.turnOff();
+    }
+
+  }
+
+  // Side Menu Closed
+  sideMenuClosed() {
+    let view = this.nav.getActive();
+    if (this.settingsService.cameraMode && view.instance instanceof HomePage) {
+      setTimeout(function() {
+        this.scanCameraService.turnOn();
+      }.bind(this), 550);
+    }
   }
 }

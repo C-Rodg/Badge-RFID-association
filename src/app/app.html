@@ -1,4 +1,4 @@
-<ion-menu [content]="content" color="p-primary" drag-content="false">
+<ion-menu [content]="content" color="p-primary" drag-content="false" (ionOpen)="sideMenuOpen()" (ionClose)="sideMenuClosed()">
   <ion-header>
     <ion-toolbar color="p-primary-dark" padding-top>
       <ion-title>Validar, Inc.</ion-title>

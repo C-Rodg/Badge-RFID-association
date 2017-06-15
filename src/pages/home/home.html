@@ -13,7 +13,7 @@
 </ion-header>
 
 <ion-content>
-  <div class="status-container" id="status-container">
+  <div class="status-container" id="status-container" *ngIf="!settingsService.cameraMode">
     <div class="status-container-box" [ngClass]="{'complete-badge': (valueBadge && valueRFID), 'scanned': valueBadge}">     
       <h1 class="status-text">
         <ion-icon name="ios-close-circle-outline" *ngIf="!valueBadge"></ion-icon>
@@ -35,10 +35,43 @@
       </div>
     </div>   
   </div>
+
+  <div class="camera-container" id="camera-container" *ngIf="settingsService.cameraMode">
+    <div class="camera-status" id="first-camera" [ngClass]="{'complete-badge': (valueBadge && valueRFID), 'scanned': valueBadge}">
+      <h1>
+        <ion-icon name="ios-close-circle-outline" *ngIf="!valueBadge"></ion-icon>
+        <ion-icon name="md-checkmark-circle-outline" *ngIf="valueBadge"></ion-icon>
+        <span>Badge ID</span>
+      </h1>
+    </div>
+    <div class="camera-status" [ngClass]="{'complete-rfid': (valueBadge && valueRFID), 'scanned': valueRFID}">
+      <h1>
+        <ion-icon name="ios-close-circle-outline" *ngIf="!valueRFID"></ion-icon>
+        <ion-icon name="md-checkmark-circle-outline" *ngIf="valueRFID"></ion-icon>
+        <span>Wireless</span>
+      </h1>
+    </div>
+    <div class="success-box" [ngClass]="{'show-success': (valueBadge && valueRFID)}">
+      <div class="success-wrapper">
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>
+        <h1>Associated!</h1>
+      </div>
+    </div>
+  </div>
 </ion-content>
 
 <ion-footer>
   <ion-toolbar>
-    <button color="p-primary" ion-button large block (touchstart)="scanBtnClicked($event, true)" (touchend)="scanBtnClicked($event, false)">Scan</button>
+    <button *ngIf="!settingsService.cameraMode" color="p-primary" ion-button large block (touchstart)="scanBtnClicked($event, true)" (touchend)="scanBtnClicked($event, false)">Scan</button>
+    <div *ngIf="settingsService.cameraMode" class="camera-controls">
+      <button ion-button icon-left clear color="p-primary" (tap)="toggleTorch()">
+        <ion-icon name="{{scanCameraService.torch === 'OFF' ? 'ios-flash-outline' : 'ios-flash'}}"></ion-icon>
+        Torch
+      </button>
+      <button ion-button icon-left clear color="p-primary" (tap)="toggleCamera()">
+        <ion-icon name="reverse-camera"></ion-icon>
+        Camera
+      </button>
+    </div>
   </ion-toolbar>
 </ion-footer>

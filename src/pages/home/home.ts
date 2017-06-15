@@ -1,7 +1,9 @@
 import { Component, NgZone } from '@angular/core';
 import { SoundService } from '../../providers/soundService';
 import { ScanSledService } from '../../providers/scanSledService';
+import { ScanCameraService } from '../../providers/scanCameraService';
 import { ParseBadgeService } from '../../providers/parseBadgeService';
+import { SettingsService } from '../../providers/settingsService';
 
 @Component({
   selector: 'page-home',
@@ -13,7 +15,9 @@ export class HomePage {
   valueRFID: string = "";
 
   constructor(
+    private settingsService: SettingsService,
     private scanSledService: ScanSledService,
+    private scanCameraService: ScanCameraService,
     private parseBadgeService: ParseBadgeService,
     private soundService: SoundService,
     private zone: NgZone,
@@ -21,14 +25,23 @@ export class HomePage {
 
   }
 
-  ionViewWillEnter() {
-
-  }
-
-  // Bind OnDataRead to component, enable sled scanning
+  // Bind OnDataRead to component, enable sled scanning or turn on camera
   ionViewDidEnter() {
     (<any>window).OnDataRead = this.onScan.bind(this);
-    this.scanSledService.sendScanCommand('enableButtonScan');
+
+    if (!this.settingsService.cameraMode) {
+      this.scanSledService.sendScanCommand('enableButtonScan');
+    } else {
+      this.scanCameraService.calculatePosition();
+      this.scanCameraService.turnOn();
+    } 
+  }
+
+  // Shut off camera if leaving
+  ionViewWillLeave() {
+    if (this.settingsService.cameraMode) {
+      this.scanCameraService.turnOff();
+    }
   }
 
   // Disallow scanning on other pages
@@ -49,7 +62,7 @@ export class HomePage {
         } else if (d.type === 'RFID') {
           this.valueRFID = d.val;
         } else {
-          // Throw error for unknown type...
+          // TODO: Throw error for unknown type...
           this.soundService.playDenied();
           return false;
         }
@@ -69,6 +82,7 @@ export class HomePage {
         }
 
       }, (err) => {
+        // TODO: THROW ERROR
         alert(JSON.stringify(err));
       })
     });
@@ -81,12 +95,22 @@ export class HomePage {
     } else {
       this.scanSledService.sendScanCommand('stopScan');
     }
-  }
+  }  
 
   // Reset RFID & BadgeID values
   resetScans() {
     this.valueBadge = "";
     this.valueRFID = "";
   } 
+
+  // Toggle Torch
+  toggleTorch() {
+    this.scanCameraService.toggleTorch();
+  }
+
+  // Toggle Camera
+  toggleCamera() {
+    this.scanCameraService.toggleCamera();
+  }
 
 }

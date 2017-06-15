@@ -41,7 +41,7 @@ export class ParseBadgeService {
         }
     }
 
-    // Parse PDF 417 badges
+    // Parse PDF 417 badges -- assuming RFID will never be PDF417
     private parsePDF417(scannedData) {
         let scannedFields = scannedData.split(';');
         if (scannedFields.length > 0 && scannedFields[0]) {     // Assuming badgeId is index 0
@@ -53,7 +53,7 @@ export class ParseBadgeService {
         return this.throwError("Empty PDF417");
     }
 
-    // Parse 3 of 9, assuming RFID will never be 3 of 9 only Validar badges
+    // Parse 3 of 9 badges -- assuming RFID will never be 3 of 9 only Validar badges
     private parse39(scannedData) {
         if (scannedData != null) {
             return Observable.of({

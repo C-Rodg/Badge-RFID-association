@@ -9,8 +9,6 @@ import { ParseBadgeService } from '../../providers/parseBadgeService';
 })
 export class HomePage {
   
-  scanBadge: boolean = false;
-  scanRFID: boolean = false;
   valueBadge: string = "";
   valueRFID: string = "";
 
@@ -43,9 +41,35 @@ export class HomePage {
     let scanData = data;
     this.zone.run(() => {
       // Determine if badgeId or wireless device, if both scanned associate and save
-      alert(JSON.stringify(data));
       this.parseBadgeService.parse(data).subscribe((d) => {
-        alert(JSON.stringify(d));
+        
+        // Assign new scan data
+        if (d.type === 'BADGE') {
+          this.valueBadge = d.val;
+        } else if (d.type === 'RFID') {
+          this.valueRFID = d.val;
+        } else {
+          // Throw error for unknown type...
+          this.soundService.playDenied();
+          return false;
+        }
+
+        // Play scan noise
+        this.soundService.playScan();
+
+        // Check if both scans are present
+        if (this.valueBadge && this.valueRFID) {
+          // Save data and play accepted noise
+          setTimeout(function() {
+            this.soundService.playAccepted();
+          }.bind(this), 800);
+          setTimeout(function() {
+            this.resetScans();
+          }.bind(this), 2000);
+        }
+
+      }, (err) => {
+        alert(JSON.stringify(err));
       })
     });
   }
@@ -61,31 +85,8 @@ export class HomePage {
 
   // Reset RFID & BadgeID values
   resetScans() {
-    this.scanBadge = false;
-    this.scanRFID = false;
     this.valueBadge = "";
     this.valueRFID = "";
-  }  
-
-  // TESTING -- CAN DELETE
-  startScan() {
-    // TESTING:
-    if (!this.scanBadge) {
-      this.scanBadge = true;
-      this.soundService.playScan();
-    } else {
-      this.scanRFID = true;
-      this.soundService.playScan();
-    }
-
-    if (this.scanBadge && this.scanRFID) {
-      setTimeout(function() {
-        this.soundService.playAccepted();
-      }.bind(this), 800);      
-      setTimeout(function(){
-        this.resetScans();
-      }.bind(this), 2000);
-    }
-  }  
+  } 
 
 }

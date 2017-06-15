@@ -11,6 +11,7 @@ import { InfoService } from '../providers/infoService';
 import { SoundService } from '../providers/soundService';
 import { ScanSledService } from '../providers/scanSledService';
 import { ParseBadgeService } from '../providers/parseBadgeService';
+import { ScanCameraService } from '../providers/scanCameraService';
 
 @NgModule({
   declarations: [
@@ -36,6 +37,7 @@ import { ParseBadgeService } from '../providers/parseBadgeService';
     SoundService,
     ScanSledService,
     ParseBadgeService,
+    ScanCameraService,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })

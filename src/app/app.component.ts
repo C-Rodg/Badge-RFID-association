@@ -1,5 +1,5 @@
 import { Component, ViewChild, NgZone } from '@angular/core';
-import { Nav, AlertController } from 'ionic-angular';
+import { Nav, AlertController, Events } from 'ionic-angular';
 
 import { HomePage } from '../pages/home/home';
 import { SettingsPage } from '../pages/settings/settings';
@@ -24,6 +24,7 @@ export class MyApp {
       private scanCameraService: ScanCameraService,
       private scanSledService: ScanSledService,
       private alertCtrl: AlertController,
+      private events: Events,
       private zone: NgZone
     ) {
 
@@ -55,6 +56,9 @@ export class MyApp {
     this.zone.run(() => {
       this.infoService.getClientInfo().subscribe(() => {
         let view = this.nav.getActive();
+        if (view.instance instanceof SettingsPage) {
+          this.events.publish('event:onLineaConnect');
+        }
         if (this.settingsService.cameraMode) {
           if (view.instance instanceof HomePage) {
             this.scanCameraService.turnOff();
@@ -77,7 +81,7 @@ export class MyApp {
                   this.settingsService.setValue(false, 'cameraMode');
                   if (view.instance instanceof HomePage) {
                     this.scanSledService.sendScanCommand('enableButtonScan');
-                  }
+                  } 
                 }
               }
             ]

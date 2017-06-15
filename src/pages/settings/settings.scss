@@ -1,3 +1,29 @@
 page-settings {
+    .content-md {
+        background-color: #e5e5e5;
+    }
 
+    .inline-card-button {
+        .inline-card-icon {
+            border-right: 1px solid color($colors, white-divider);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+        }
+
+        ion-col {
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
+
+        .secondary-text {
+            line-height: 1.1;
+            color: color($colors, p-text-secondary);
+
+            ion-icon {
+                vertical-align: middle;
+            }
+        }
+    }
 }

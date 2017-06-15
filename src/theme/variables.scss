@@ -46,6 +46,9 @@ $colors: (
 
 // Overrides 
 
+// Toast Overrides
+$toast-md-title-padding-top: 28px;
+
 // Changing Select Radio Button color
 $alert-md-button-text-color: color($colors, p-primary-dark);
 

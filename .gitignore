@@ -29,6 +29,10 @@ plugins/ios.json
 www/
 $RECYCLE.BIN/
 
+
 .DS_Store
 Thumbs.db
 UserInterfaceState.xcuserstate
+
+# Validar Configs
+src/config/leadsourcerecorddefinition.xml

@@ -7,6 +7,7 @@ import { InfoService } from '../providers/infoService';
 import { SettingsService } from '../providers/settingsService';
 import { ScanCameraService } from '../providers/scanCameraService';
 import { ScanSledService } from '../providers/scanSledService';
+import { SaveService } from '../providers/saveService';
 
 @Component({
   templateUrl: 'app.html'
@@ -15,14 +16,16 @@ export class MyApp {
   @ViewChild(Nav) nav: Nav;
 
   rootPage: any = HomePage;
-  pages: Array<{title: string, component: any, icon: string}>;
+  pages: Array<{ title: string, component: any, icon: string }>;
   pendingUploads: number = 0;
+  currentlyUploading: boolean = false;
 
   constructor(
       private infoService: InfoService,
       private settingsService: SettingsService,
       private scanCameraService: ScanCameraService,
       private scanSledService: ScanSledService,
+      private saveService: SaveService,
       private alertCtrl: AlertController,
       private events: Events,
       private zone: NgZone,
@@ -44,6 +47,9 @@ export class MyApp {
 
     // Get initial device and lead source info
     this.getDeviceInfo();
+
+    // Get Pending uploads
+    this.getPendingCount();
 
     this.menuCtrl.swipeEnable(false);
   }
@@ -99,10 +105,14 @@ export class MyApp {
 
   // Side Menu - Open Page
   openPage(page) {
+    // Exit application
     if (page.icon === 'exit') {
       window.location.href = "http://localhost/navigate/home";
       return false;
-    } else if (page.icon === 'cloud-icon') {
+    } 
+    // Upload pending scans
+    else if (page.icon === 'cloud-upload') {
+      this.currentlyUploading = true;
       let loader = this.loadingCtrl.create({
         content: 'Uploading scans...',
         dismissOnPageChange: true
@@ -111,16 +121,22 @@ export class MyApp {
       // TODO: UPLOAD SCANS
       setTimeout(function() {
         loader.dismiss();
+        this.currentlyUploading = false;
+        let view = this.nav.getActive();
+        if (view.instance instanceof HomePage && this.settingsService.cameraMode) {
+          this.scanCameraService.turnOn();
+        }
         let toast = this.toastCtrl.create({
           message: `${this.pendingUploads} scans uploaded!`,
           duration: 2500,
           position: 'top'
         });
         toast.present();
-        this.pendingUploads = 0;
+        this.getPendingCount();
       }.bind(this), 3000);
-      return false;
-    } else {
+    } 
+    // Navigate to HomePage or SettingsPage
+    else {
       this.nav.setRoot(page.component);
     }    
   }
@@ -130,13 +146,12 @@ export class MyApp {
     if (this.settingsService.cameraMode) {
       this.scanCameraService.turnOff();
     }
-
   }
 
   // Side Menu Closed
   sideMenuClosed() {
     let view = this.nav.getActive();
-    if (this.settingsService.cameraMode && view.instance instanceof HomePage) {
+    if (this.settingsService.cameraMode && view.instance instanceof HomePage && !this.currentlyUploading) {
       setTimeout(function() {
         this.scanCameraService.turnOn();
       }.bind(this), 550);
@@ -145,6 +160,10 @@ export class MyApp {
 
   // Get Pending Upload Count
   getPendingCount() {
-    // TODO: Get pending upload count
+    this.saveService.count('?uploaded=no').subscribe((data) => {
+      this.zone.run(() => {
+        this.pendingUploads = data.Count;
+      });
+    });
   }
 }

@@ -9,7 +9,7 @@
 
 <ion-content>
 
-  <ion-card class="settings-card inline-card-button" (tap)="uploadScans()">
+  <ion-card tappable class="settings-card inline-card-button" (tap)="uploadScans()">
     <ion-row>
       <ion-col class="inline-card-icon" col-3 text-center stretch>
         <ion-icon name="ios-cloud-upload-outline"></ion-icon>
@@ -17,6 +17,18 @@
       <ion-col center padding-left>
         <h1>Upload Scans</h1>
         <p class="secondary-text">Pending Uploads: {{pendingUploads}}</p>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+
+  <ion-card tappable class="settings-card inline-card-button" (tap)="editUser()">
+    <ion-row>
+      <ion-col class="inline-card-icon" col-3 text-center stretch>
+        <ion-icon name="ios-create-outline"></ion-icon>
+      </ion-col>
+      <ion-col center padding-left>
+        <h1>Edit User</h1>
+        <p class="secondary-text">{{settingsService.currentUser}}</p>
       </ion-col>
     </ion-row>
   </ion-card>

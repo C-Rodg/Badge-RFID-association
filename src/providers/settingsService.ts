@@ -5,6 +5,7 @@ import { LeadSourceGuid } from '../helpers/leadSourceGuid';
 export class SettingsService {
     backgroundUploadWait: number = 3;
     cameraMode: boolean = true;
+    currentUser: string = "";
 
     constructor() {
         let settings = this.loadStoredSettings();
@@ -23,7 +24,8 @@ export class SettingsService {
     storeCurrentSettings() {
         const settings = {
             backgroundUploadWait: this.backgroundUploadWait,
-            cameraMode: this.cameraMode
+            cameraMode: this.cameraMode,
+            currentUser: this.currentUser
         };
         const settingsStr = JSON.stringify(settings);
         window.localStorage.setItem(LeadSourceGuid.guid, settingsStr);

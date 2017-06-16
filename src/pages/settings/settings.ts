@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
-import { Events, LoadingController, ToastController } from "ionic-angular";
+import { Events, LoadingController, ToastController, AlertController } from "ionic-angular";
 
 import { SettingsService } from '../../providers/settingsService';
 import { InfoService } from '../../providers/infoService';
+import { SaveService } from '../../providers/saveService';
 
 @Component({
   selector: 'page-settings',
@@ -23,9 +24,11 @@ export class SettingsPage {
   constructor(
     private settingsService: SettingsService,
     private infoService: InfoService,
+    private saveService: SaveService,
     private events: Events,
     private loadingCtrl: LoadingController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController
   ) {
   }
 
@@ -36,6 +39,7 @@ export class SettingsPage {
     });
     this.buildAboutSection = this.buildAboutSection.bind(this);
     this.events.subscribe('event:onLineaConnect', this.buildAboutSection);
+    this.getPendingCount();
   }
 
   // Unsubscribe from all events
@@ -60,7 +64,7 @@ export class SettingsPage {
         position: 'top'
       });
       toast.present();
-      this.pendingUploads = 0;
+      this.getPendingCount();
     }.bind(this), 2500);
   }
 
@@ -83,5 +87,36 @@ export class SettingsPage {
   // Save settings to local storage
   saveSettings() {
     this.settingsService.storeCurrentSettings();
+  }
+
+  // Edit User
+  editUser() {
+    let prompt = this.alertCtrl.create({
+      title: 'Edit User',
+      message: 'Please enter a name for this user.',
+      inputs: [{
+        name: 'user',
+        placeholder: 'John Smith',
+        value: this.settingsService.currentUser
+      }],
+      buttons: [
+        {
+          text: 'Cancel',
+        }, {
+          text: 'Save',
+          handler: data => {
+            this.settingsService.setValue(data.user, 'currentUser');
+          }
+        }
+      ]
+    });
+    prompt.present();
+  }
+
+  // Get Pending Upload Count
+  getPendingCount() {
+    this.saveService.count('?uploaded=no').subscribe((data) => {      
+        this.pendingUploads = data.Count;
+    });
   }
 }

@@ -1,9 +1,12 @@
 import { Component, NgZone } from '@angular/core';
+import { ToastController } from 'ionic-angular';
 import { SoundService } from '../../providers/soundService';
 import { ScanSledService } from '../../providers/scanSledService';
 import { ScanCameraService } from '../../providers/scanCameraService';
 import { ParseBadgeService } from '../../providers/parseBadgeService';
 import { SettingsService } from '../../providers/settingsService';
+import { InfoService } from '../../providers/infoService';
+import { SaveService } from '../../providers/saveService';
 
 @Component({
   selector: 'page-home',
@@ -19,8 +22,11 @@ export class HomePage {
     private scanSledService: ScanSledService,
     private scanCameraService: ScanCameraService,
     private parseBadgeService: ParseBadgeService,
+    private saveService: SaveService,
     private soundService: SoundService,
+    private infoService: InfoService,
     private zone: NgZone,
+    private toastCtrl: ToastController
   ) {
 
   }
@@ -61,9 +67,9 @@ export class HomePage {
           this.valueBadge = d.val;
         } else if (d.type === 'RFID') {
           this.valueRFID = d.val;
-        } else {
-          // TODO: Throw error for unknown type...
+        } else {          
           this.soundService.playDenied();
+          alert("Uh-Oh! There seems to be an issue parsing the badge..");
           return false;
         }
 
@@ -73,6 +79,19 @@ export class HomePage {
         // Check if both scans are present
         if (this.valueBadge && this.valueRFID) {
           // Save data and play accepted noise
+          const saveObj = {
+            badge: this.valueBadge,
+            rfid: this.valueRFID,
+            station: this.infoService.client.ClientName,
+            device: this.infoService.client.DeviceType,
+            user: this.settingsService.currentUser
+          };
+
+          this.saveService.startSave(saveObj).subscribe((data) => {
+          }, (err) => {
+            alert("Uh-Oh! We're having issues saving..")
+          });
+
           setTimeout(function() {
             this.soundService.playAccepted();
           }.bind(this), 800);
@@ -82,9 +101,8 @@ export class HomePage {
         }
 
       }, (err) => {
-        // TODO: THROW ERROR
-        alert(JSON.stringify(err));
-      })
+        alert("Uh-Oh! We're having issues parsing the barcode..");
+      });
     });
   }
 

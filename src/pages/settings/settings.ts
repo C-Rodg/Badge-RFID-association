@@ -18,7 +18,7 @@ export class SettingsPage {
     cameraBack: "checkmark"
   };
 
-  pendingUpload : number = 0;
+  pendingUploads : number = 23;
 
   constructor(
     private settingsService: SettingsService,
@@ -55,11 +55,12 @@ export class SettingsPage {
     setTimeout(function() {
       loader.dismiss();
       let toast = this.toastCtrl.create({
-        message: 'All scans uploaded!',
+        message: `${this.pendingUploads} scans uploaded!`,
         duration: 2000,
         position: 'top'
       });
       toast.present();
+      this.pendingUploads = 0;
     }.bind(this), 2500);
   }
 

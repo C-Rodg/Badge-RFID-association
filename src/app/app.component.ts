@@ -1,5 +1,5 @@
 import { Component, ViewChild, NgZone } from '@angular/core';
-import { Nav, AlertController, Events } from 'ionic-angular';
+import { Nav, AlertController, Events, MenuController, LoadingController, ToastController } from 'ionic-angular';
 
 import { HomePage } from '../pages/home/home';
 import { SettingsPage } from '../pages/settings/settings';
@@ -15,8 +15,8 @@ export class MyApp {
   @ViewChild(Nav) nav: Nav;
 
   rootPage: any = HomePage;
-
-  pages: Array<{title: string, component: any}>;
+  pages: Array<{title: string, component: any, icon: string}>;
+  pendingUploads: number = 0;
 
   constructor(
       private infoService: InfoService,
@@ -25,7 +25,10 @@ export class MyApp {
       private scanSledService: ScanSledService,
       private alertCtrl: AlertController,
       private events: Events,
-      private zone: NgZone
+      private zone: NgZone,
+      private menuCtrl: MenuController,
+      private loadingCtrl: LoadingController,
+      private toastCtrl: ToastController
     ) {
 
     // Bind to OnLineaConnect
@@ -33,31 +36,33 @@ export class MyApp {
 
     // Create sidemenu pages
     this.pages = [
-      { title: 'Associate', component: HomePage },
-      { title: 'Settings', component: SettingsPage }
+      { title: 'Associate', component: HomePage, icon: 'code-working' },
+      { title: 'Settings', component: SettingsPage, icon: 'settings' },
+      { title: 'Upload Scans', component: '', icon: 'cloud-upload' },
+      { title: 'Exit', component: '', icon: 'exit' }
     ];
 
     // Get initial device and lead source info
     this.getDeviceInfo();
+
+    this.menuCtrl.swipeEnable(false);
   }
 
   // Get lead source and client info
   getDeviceInfo() {
-    this.infoService.getClientInfo().subscribe((d) => {
-
-    });
-    this.infoService.getLeadSource().subscribe((r) => {
-
-    });
+    this.infoService.getClientInfo().subscribe((d) => {});
+    this.infoService.getLeadSource().subscribe((r) => {});
   }
 
-  // On Sled wake
+  // On Sled wake - CameraMode/HomePage: turn off camera, prompt to switch; !CameraMode/HomePage: enable button scan; SettingsPage: publish event
   onZoneOnAppActive() {
     this.zone.run(() => {
       this.infoService.getClientInfo().subscribe(() => {
         let view = this.nav.getActive();
         if (view.instance instanceof SettingsPage) {
           this.events.publish('event:onLineaConnect');
+        } else if (view.instance instanceof HomePage && !this.settingsService.cameraMode) {
+          this.scanSledService.sendScanCommand('enableButtonScan');
         }
         if (this.settingsService.cameraMode) {
           if (view.instance instanceof HomePage) {
@@ -94,7 +99,30 @@ export class MyApp {
 
   // Side Menu - Open Page
   openPage(page) {
-    this.nav.setRoot(page.component);
+    if (page.icon === 'exit') {
+      window.location.href = "http://localhost/navigate/home";
+      return false;
+    } else if (page.icon === 'cloud-icon') {
+      let loader = this.loadingCtrl.create({
+        content: 'Uploading scans...',
+        dismissOnPageChange: true
+      });
+      loader.present();
+      // TODO: UPLOAD SCANS
+      setTimeout(function() {
+        loader.dismiss();
+        let toast = this.toastCtrl.create({
+          message: `${this.pendingUploads} scans uploaded!`,
+          duration: 2500,
+          position: 'top'
+        });
+        toast.present();
+        this.pendingUploads = 0;
+      }.bind(this), 3000);
+      return false;
+    } else {
+      this.nav.setRoot(page.component);
+    }    
   }
 
   // Side Menu Open
@@ -113,5 +141,10 @@ export class MyApp {
         this.scanCameraService.turnOn();
       }.bind(this), 550);
     }
+  }
+
+  // Get Pending Upload Count
+  getPendingCount() {
+    // TODO: Get pending upload count
   }
 }

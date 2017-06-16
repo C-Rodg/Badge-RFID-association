@@ -6,9 +6,11 @@
   </ion-header>
 
   <ion-content>
-    <ion-list class="side-menu">
+    <ion-list class="side-menu">      
       <button menuClose ion-item *ngFor="let p of pages" (click)="openPage(p)">
+        <ion-icon name={{p.icon}} item-left></ion-icon>
         {{p.title}}
+        <ion-badge *ngIf="p.icon === 'cloud-upload'" color="p-primary-dark" item-right>{{pendingUploads}}</ion-badge>
       </button>
     </ion-list>
   </ion-content>

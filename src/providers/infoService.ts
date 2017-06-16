@@ -8,6 +8,10 @@ export class InfoService {
     client: any = [];
     leadsource: any = [];
 
+    currentToken: {
+        SessionToken: null
+    };
+
     constructor(private http: Http) {}
 
     // Get Client Info
@@ -45,5 +49,55 @@ export class InfoService {
     // Helper - Get Linea Status
     getLineaStatus() : boolean {
         return (!this.client.Scanner || this.client.Scanner === 'None') ? false : true;
+    }
+
+    // Update Token
+    updateToken() {
+        return this.initiateChallenge()
+            .flatMap(data => this.computeHash(data))
+            .flatMap(data => this.validateChallenge(data))
+            .flatMap(data => this.saveToken(data));
+    }
+
+    // Update Token -- step #1
+    private initiateChallenge() {
+        const loginArgs = {
+            loginRestUrl: this.leadsource.LoginUrl,
+            authCode: this.leadsource.AuthCode,
+            authGuid: this.leadsource.AuthGuid
+        };
+        return this.http.post(`${loginArgs.loginRestUrl}/InitiateChallenge/${loginArgs.authGuid}`, loginArgs).map(res => res.json()).map((r) => {
+            loginArgs['challenge'] = r;
+            return loginArgs;
+        });
+    }
+    
+    // Update Token -- step #2
+    private computeHash(loginArgs) {
+        const request = {
+            authcode: loginArgs.authCode,
+            nonce: loginArgs.challenge.Nonce
+        };
+        return this.http.post('http://localhost/digestauthentication/computehash', request).map(res => res.json()).map((r) => {
+            loginArgs['hash'] = r.Hash;
+            return loginArgs;
+        });
+    }
+
+    // Update Token -- step #3
+    private validateChallenge(loginArgs) {
+        let urlHash = loginArgs.hash.replace(/\//g, "_");
+        urlHash = urlHash.replace(/\+/g, '-');
+        return this.http.post(`${loginArgs.loginRestUrl}/ValidateChallenge/${loginArgs.challenge.ChallengeGuid}/${encodeURIComponent(urlHash)}`, loginArgs).map(res => res.json()).map((r) => {
+            return {
+                SessionToken: r.SessionToken
+            };
+        });
+    }
+
+    // Update Token -- step #4
+    private saveToken(loginArgs) {
+        this.currentToken.SessionToken = loginArgs.SessionToken;
+        return this.http.put(`http://localhost/leadsources/${LeadSourceGuid.guid}/sessiontoken`, this.currentToken).map(res => res.json());
     }
 }

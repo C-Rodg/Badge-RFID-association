@@ -57,7 +57,6 @@ export class HomePage {
 
   // Scan Registered
   onScan(data) {
-    let scanData = data;
     this.zone.run(() => {
       // Determine if badgeId or wireless device, if both scanned associate and save
       this.parseBadgeService.parse(data).subscribe((d) => {

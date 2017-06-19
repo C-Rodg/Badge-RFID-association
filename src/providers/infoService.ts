@@ -7,6 +7,7 @@ import { LeadSourceGuid } from '../helpers/leadSourceGuid';
 export class InfoService {
     client: any = [];
     leadsource: any = [];
+    seat: string = null;
 
     currentToken: {
         SessionToken: null
@@ -49,6 +50,21 @@ export class InfoService {
     // Helper - Get Linea Status
     getLineaStatus() : boolean {
         return (!this.client.Scanner || this.client.Scanner === 'None') ? false : true;
+    }
+
+    // Get Current Seat
+    getSeat() {
+        return this.http.get(`http://localhost/leadsources/${LeadSourceGuid.guid}/seat`).map(res => res.json()).map((r) => {
+            if (r && r.SeatGuid) {
+                this.seat = r.SeatGuid;
+            }
+            return r;
+        });
+    }
+
+    // Get Current Token
+    getCurrentToken() {
+        return this.currentToken.SessionToken;
     }
 
     // Update Token

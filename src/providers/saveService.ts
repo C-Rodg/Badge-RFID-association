@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
+import { Http, Headers } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/forkJoin'
+import 'rxjs/add/operator/catch';
 
 import { InfoService } from './infoService';
 
@@ -91,6 +92,11 @@ export class SaveService {
         return this.http.get(`${this.prefix}${LeadSourceGuid.guid}/leads?${query}`).map(res => res.json());
     }
 
+    // Find visits
+    findVisits(query) {
+        return this.http.get(`${this.prefix}${LeadSourceGuid.guid}/visits?${query}`).map(res => res.json());
+    }
+
     // Save new lead
     saveNew(lead) {
         return this.http.put(`${this.prefix}${LeadSourceGuid.guid}/leads`, lead).map(res => res.json());
@@ -111,6 +117,21 @@ export class SaveService {
         return this.http.get(`${this.prefix}${LeadSourceGuid.guid}/leads/count${query}`).map(res => res.json());
     }
 
+    // Mark Uploaded
+    markUploaded(leadGuid) {
+        return this.http.put(`${this.prefix}${LeadSourceGuid.guid}/leads/${leadGuid}/uploaded`, {}).map(res => res.json());
+    }
+
+    // Mark local DB as deleted
+    markDeleted(leadGuid) {
+        return this.http.put(`${this.prefix}${LeadSourceGuid.guid}/leads/${leadGuid}/deleted`, {}).map(res => res.json());
+    }
+
+    // Mark local DB as undeleted
+    markUndeleted(leadGuid) {
+        return this.http.put(`${this.prefix}${LeadSourceGuid.guid}/leads/${leadGuid}/undeleted`, {}).map(res => res.json());
+    }
+
     // Start background uploading
     initializeBackgroundUpload(mins) {
         clearInterval(this.backgroundInterval);
@@ -129,7 +150,7 @@ export class SaveService {
             return false;
         }
         return this.uploadPending();
-    }
+    }    
 
     // Uploading any pending scans
     uploadPending() {
@@ -154,5 +175,44 @@ export class SaveService {
                     return Observable.forkJoin(requests);
                 });
             });
+    }
+
+    // Upload single lead
+    upload(lead) {
+        let seat = null;
+        return this.infoService.getSeat()
+        .flatMap((newSeat) => {
+            seat = newSeat.SeatGuid;
+            return Observable.of(seat);
+        })
+        .flatMap(() => this.findVisits(`ScanData=${lead.ScanData}`))
+        .flatMap((visits) => {
+
+            const markDeleted = lead.DeleteDateTime !== null;
+
+            const req = {
+                SourceApplicationId: lead.LeadGuid,
+                AcquisitionUtcDateTime: lead.CreateDateTime,
+                Keys: lead.Keys,
+                TranslateKeys: null,
+                Responses: lead.Responses,
+                MarkedAsDeleted: markDeleted
+            };
+
+            const url = `${this.infoService.leadsource.LeadSourceUrl}/UpsertLead/${LeadSourceGuid.guid}/${seat}`;
+            let headers = new Headers();
+            headers.append('Content-Type', 'application/json');
+            headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
+            return this.http.post(url, req, { headers }).map(res => res.json())
+                .flatMap(() => {
+                    return this.markUploaded(lead.LeadGuid);
+                })
+                .catch((err) => {
+                    if (err && err.Fault && err.Fault.Type === 'InvalidSessionFault') {
+                        return this.infoService.updateToken().flatMap(() => this.upload(lead));
+                    }
+                    return Observable.throw(err);
+                });
+        });
     }
 }

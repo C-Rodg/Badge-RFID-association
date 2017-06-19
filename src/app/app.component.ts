@@ -45,22 +45,16 @@ export class MyApp {
       { title: 'Exit', component: '', icon: 'exit' }
     ];
 
-    // Get initial device and lead source info
-    this.getDeviceInfo();
-
-    // Get Pending uploads
-    this.getPendingCount();
+    // Get initial device and lead source info, handle logging in
+    this.infoService.startUpApplication().subscribe(() => {
+      // Get Pending uploads
+      this.getPendingCount();
+    });
 
     // Start background uploading
     this.startBackgroundUpload();
 
     this.menuCtrl.swipeEnable(false);
-  }
-
-  // Get lead source and client info
-  getDeviceInfo() {
-    this.infoService.getClientInfo().subscribe((d) => {});
-    this.infoService.getLeadSource().subscribe((r) => {});
   }
 
   // On Sled wake - CameraMode/HomePage: turn off camera, prompt to switch; !CameraMode/HomePage: enable button scan; SettingsPage: publish event

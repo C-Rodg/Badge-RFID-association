@@ -6,6 +6,7 @@ import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/forkJoin'
 import 'rxjs/add/operator/catch';
+import 'rxjs/add/observable/throw';
 
 import { InfoService } from './infoService';
 
@@ -149,7 +150,7 @@ export class SaveService {
         if (!window.navigator.onLine) {
             return false;
         }
-        return this.uploadPending();
+        this.uploadPending().subscribe((data) => { }, (err) => { });
     }    
 
     // Uploading any pending scans
@@ -168,7 +169,6 @@ export class SaveService {
                 for(; i < len; i++) {
                     requests.push(this.upload(leads[i]));
                 }
-
                 if (len === 0) {
                     return Observable.of([]);
                 }

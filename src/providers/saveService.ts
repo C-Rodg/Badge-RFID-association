@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/observable/forkJoin'
+
+import { InfoService } from './infoService';
 
 import { LeadSourceGuid } from '../helpers/leadSourceGuid';
 
@@ -9,8 +14,12 @@ import { LeadSourceGuid } from '../helpers/leadSourceGuid';
 export class SaveService {
 
     private prefix = 'http://localhost/leadsources/';
+    private backgroundInterval: any = null;
 
-    constructor(private http: Http) { }
+    constructor(
+        private http: Http,
+        private infoService: InfoService
+    ) { }
 
     // Start Saving a pair of scans
     startSave(scanObj) {
@@ -74,8 +83,8 @@ export class SaveService {
                     return this.saveVisit(visit);
                 });
             }
-        })
-    } // 
+        });
+    }
 
     // Find leads
     find(query) {
@@ -100,5 +109,50 @@ export class SaveService {
     // Get Count
     count(query) {
         return this.http.get(`${this.prefix}${LeadSourceGuid.guid}/leads/count${query}`).map(res => res.json());
+    }
+
+    // Start background uploading
+    initializeBackgroundUpload(mins) {
+        clearInterval(this.backgroundInterval);
+        if (mins === 0) {
+            return false;
+        }
+        let time = mins * 60 * 1000;
+        this.backgroundInterval = setInterval(() => {
+            this.backgroundUpload();
+        }, time);
+    }
+
+    // Upload in background
+    backgroundUpload() {
+        if (!window.navigator.onLine) {
+            return false;
+        }
+        return this.uploadPending();
+    }
+
+    // Uploading any pending scans
+    uploadPending() {
+        if (!window.navigator.onLine) {
+            return Observable.throw("Please check your internet connection");
+        }
+
+        return this.find('uploaded=no&error=no')
+            .flatMap((data) => {
+                let leads = data,
+                    requests = [],
+                    i = 0,
+                    len = leads.length;
+                for(; i < len; i++) {
+                    requests.push(this.upload(leads[i]));
+                }
+
+                if (len === 0) {
+                    return Observable.of([]);
+                }
+                return this.infoService.updateToken().flatMap(() => {
+                    return Observable.forkJoin(requests);
+                });
+            });
     }
 }

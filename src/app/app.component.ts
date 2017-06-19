@@ -51,6 +51,9 @@ export class MyApp {
     // Get Pending uploads
     this.getPendingCount();
 
+    // Start background uploading
+    this.startBackgroundUpload();
+
     this.menuCtrl.swipeEnable(false);
   }
 
@@ -165,5 +168,10 @@ export class MyApp {
         this.pendingUploads = data.Count;
       });
     });
+  }
+
+  // Start background upload
+  startBackgroundUpload() {
+    this.saveService.initializeBackgroundUpload(this.settingsService.backgroundUploadWait);
   }
 }

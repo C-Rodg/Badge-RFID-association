@@ -121,8 +121,9 @@ export class MyApp {
         dismissOnPageChange: true
       });
       loader.present();
-      // TODO: UPLOAD SCANS
-      setTimeout(function() {
+
+      // Start uploading
+      this.saveService.uploadPending().subscribe((data) => {
         loader.dismiss();
         this.currentlyUploading = false;
         let view = this.nav.getActive();
@@ -130,13 +131,27 @@ export class MyApp {
           this.scanCameraService.turnOn();
         }
         let toast = this.toastCtrl.create({
-          message: `${this.pendingUploads} scans uploaded!`,
+          message: `Finished uploading scans!`,
           duration: 2500,
           position: 'top'
         });
         toast.present();
         this.getPendingCount();
-      }.bind(this), 3000);
+      }, (err) => {
+        loader.dismiss();
+        this.currentlyUploading = false;
+        let view = this.nav.getActive();
+        if (view.instance instanceof HomePage && this.settingsService.cameraMode) {
+          this.scanCameraService.turnOn();
+        }
+        let toast = this.toastCtrl.create({
+          message: `${err}`,
+          duration: 2500,
+          position: 'top'
+        });
+        toast.present();
+        this.getPendingCount();
+      });      
     } 
     // Navigate to HomePage or SettingsPage
     else {
@@ -146,6 +161,7 @@ export class MyApp {
 
   // Side Menu Open
   sideMenuOpen() {
+    this.getPendingCount();
     if (this.settingsService.cameraMode) {
       this.scanCameraService.turnOff();
     }

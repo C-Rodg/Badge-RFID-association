@@ -54,18 +54,26 @@ export class SettingsPage {
       dismissOnPageChange: true
     });
     loader.present();
-    
-    // TODO: TESTING - UPLOAD SCANS HERE
-    setTimeout(function() {
+
+    this.saveService.uploadPending().subscribe((data) => {
       loader.dismiss();
       let toast = this.toastCtrl.create({
-        message: `${this.pendingUploads} scans uploaded!`,
-        duration: 2000,
+        message: 'Finished uploading scans!',
+        duration: 2500,
         position: 'top'
       });
       toast.present();
       this.getPendingCount();
-    }.bind(this), 2500);
+    }, (err) => {
+      loader.dismiss();
+      let toast = this.toastCtrl.create({
+        message: err,
+        duration: 2500,
+        position: 'top'
+      });
+      toast.present();
+      this.getPendingCount();
+    });    
   }
 
   // Get About section
@@ -81,7 +89,7 @@ export class SettingsPage {
   // Start new automatic upload time
   startNewUploadTime() {
     this.settingsService.storeCurrentSettings();
-    // TODO: START NEW UPLOAD TIME IN SERVICE
+    this.saveService.initializeBackgroundUpload(this.settingsService.backgroundUploadWait);
   }
 
   // Save settings to local storage

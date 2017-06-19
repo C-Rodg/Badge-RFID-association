@@ -153,6 +153,7 @@ export class SaveService {
     }    
 
     // Uploading any pending scans
+    // TODO -- UPLOAD TO 3rd Party Service!!!
     uploadPending() {
         if (!window.navigator.onLine) {
             return Observable.throw("Please check your internet connection");

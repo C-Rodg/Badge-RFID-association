@@ -83,7 +83,7 @@ export class HomePage {
             rfid: this.valueRFID,
             station: this.infoService.client.ClientName,
             device: this.infoService.client.DeviceType,
-            user: this.settingsService.currentUser
+            user: this.settingsService.currentUser || this.infoService.client.ClientName
           };
 
           this.saveService.startSave(saveObj).subscribe((data) => {

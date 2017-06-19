@@ -60,6 +60,14 @@ export class SaveService {
                 } else {
                     lead.Responses.push({ Tag: 'lcRFID', Value: scanObj.rfid });
                 }
+                if (lead.Responses.filter(r => r.Tag === 'lcLastScanBy').length > 0) {
+                    let i = 0, j = lead.Responses.length;
+                    for(; i < j; i++) {
+                        if (lead.Responses[i].Tag === 'lcLastScanBy') {
+                            lead.Responses[i].Value = scanObj.user;
+                        }
+                    }
+                }
                 return this.saveVisit(visit).flatMap(() => {
                     return this.saveReturning(lead, data[0].LeadGuid);
                 });
@@ -68,12 +76,19 @@ export class SaveService {
             else {
                 const lead = {
                     ScanData: scanObj.badge,
-                    Keys: [{"Type":"7A56282B-4855-4585-B10B-E76B111EA1DB", "Value": scanObj.badge }],
+                    Keys: [{
+                        "Type":"7A56282B-4855-4585-B10B-E76B111EA1DB", 
+                        "Value": scanObj.badge 
+                    }, {
+                        "Type": "F9F457FE-7E6B-406E-9946-5A23C50B4DF5",
+                        "Value": `${scanObj.device}|${scanObj.station}`
+                    }],
                     Responses: []
                 };
                 let resp = lead.Responses;
                 resp.push({"Tag": "lcBadgeId", "Value": scanObj.badge });
                 resp.push({"Tag":  "lcRFID", "Value": scanObj.rfid });
+                resp.push({"Tag": "lcLastScanBy", "Value": scanObj.user});
 
                 return this.saveNew(lead).flatMap((person) => {
                     lead["LeadGuid"] = person.LeadGuid;

@@ -71,8 +71,8 @@ export class ParseBadgeService {
         let scannedFields = null;
         
         if (scannedData != null && scannedData.substring(0,4) === 'VQC:') {     // Validar QR code (badge)
-            scannedData = scannedData.substring(4);
-            scannedFields = scannedData.split(';');
+            let scannedStr = scannedData.substring(4);
+            scannedFields = scannedStr.split(';');
             if (scannedFields != null) {
                 for (let i = 0, j = scannedFields.length; i < j; i++) {
                     let field = scannedFields[i].split(':');

@@ -138,8 +138,9 @@ export class MyApp {
         if (view.instance instanceof HomePage && this.settingsService.cameraMode) {
           this.scanCameraService.turnOn();
         }
+        const msg = err.msg ? err.msg : "There was an issue uploading scans..";
         let toast = this.toastCtrl.create({
-          message: `${err}`,
+          message: msg,
           duration: 2500,
           position: 'top'
         });

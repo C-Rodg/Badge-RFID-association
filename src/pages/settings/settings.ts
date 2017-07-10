@@ -24,7 +24,8 @@ export class SettingsPage {
     cameraBack: "checkmark"
   };
 
-  pendingUploads : number = 23;
+  pendingUploads : number = 0;
+  totalScans : number = 0;
 
   constructor(
     private settingsService: SettingsService,
@@ -45,6 +46,7 @@ export class SettingsPage {
     this.buildAboutSection = this.buildAboutSection.bind(this);
     this.events.subscribe('event:onLineaConnect', this.buildAboutSection);
     this.getPendingCount();
+    this.getTotalCount();
   }
 
   // Unsubscribe from all events
@@ -61,8 +63,6 @@ export class SettingsPage {
     loader.present();
 
     this.saveService.uploadPending(false).subscribe((data) => {
-      console.log("DATA FROM UPLOADING");
-      console.log(data);
       loader.dismiss();
       let toast = this.toastCtrl.create({
         message: 'Finished uploading scans!',
@@ -71,12 +71,11 @@ export class SettingsPage {
       });
       toast.present();
       this.getPendingCount();
-    }, (err) => {
-      console.log("ERROR FROM UPLOADING");
-      console.log(err);
+    }, (err) => {     
+      const msg = err.msg ? err.msg : 'There was an issue uploading scans..';
       loader.dismiss();
       let toast = this.toastCtrl.create({
-        message: err,
+        message: msg,
         duration: 2500,
         position: 'top'
       });
@@ -137,6 +136,13 @@ export class SettingsPage {
     });
   }
 
+  // Get Total Scan Count
+  getTotalCount() {
+    this.saveService.count('').subscribe((data) => {
+      this.totalScans = data.Count;
+    });
+  }
+
   // Resync ALL Scans
   resyncAllScans() {
     let loader = this.loadingCtrl.create({
@@ -146,8 +152,6 @@ export class SettingsPage {
     loader.present();
 
     this.saveService.uploadAll().subscribe((data) => {
-      console.log("DATA FROM UPLOADING");
-      console.log(data);
       loader.dismiss();
       let toast = this.toastCtrl.create({
         message: 'Finished uploading everything!',
@@ -157,12 +161,11 @@ export class SettingsPage {
       toast.present();
       this.getPendingCount();
     }, (err) => {
-      console.log("ERROR FROM UPLOADING");
-      console.log(err);
       loader.dismiss();
+      const msg = err.msg ? err.msg : 'There was an issue uploading scans...';
       let toast = this.toastCtrl.create({
-        message: err.msg || err,
-        duration: 2500,
+        message: msg,
+        duration: 3000,
         position: 'top'
       });
       toast.present();

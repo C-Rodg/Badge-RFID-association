@@ -236,7 +236,7 @@ export class SaveService {
     // Uploading any pending scans
     uploadPending(all?) {
         if (!window.navigator.onLine) {
-            return Observable.throw({error: true, msg: "Please check your internet connection"});
+            return Observable.throw({error: true, msg: "Please check your internet connection.."});
         }
         const q = all ? 'error=no' : 'uploaded=no&error=no';
         return this.find(q)
@@ -250,7 +250,6 @@ export class SaveService {
                 return this.uploadToAssociation(data);
             })
             .flatMap((data) => {
-                console.log(data);
                 let leads = data,
                     requests = [],
                     i = 0,
@@ -283,9 +282,15 @@ export class SaveService {
                 associateObj.Mapping.push(person);
                 leadsToUpload.push(leads[i]);
             }
-        }
-        console.log(associateObj);
-        return this.http.post(this.turnoutURL, associateObj, { headers }).map(res => res.json()).flatMap(() => {
+        }        
+        return this.http.post(this.turnoutURL, associateObj, { headers }).map(res => res.json())
+        .flatMap((resp) => {
+            if (resp.ResultCode !== 200) {
+                return Observable.throw({
+                    error: true,
+                    msg: resp.Message
+                });
+            }
             return Observable.of(leadsToUpload);
         });
     }
@@ -330,8 +335,7 @@ export class SaveService {
     }
 
     // Convert database lead to mapping object to upload to 3rd party
-    private convertLeadToMapObject(lead) {
-        console.log(lead.LastVisitDateTime);
+    private convertLeadToMapObject(lead) {        
         let time = moment.utc(lead.LastVisitDateTime).toDate();
         const obj = {
             IsDeleted: 0,

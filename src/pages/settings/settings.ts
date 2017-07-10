@@ -60,7 +60,9 @@ export class SettingsPage {
     });
     loader.present();
 
-    this.saveService.uploadPending().subscribe((data) => {
+    this.saveService.uploadPending(false).subscribe((data) => {
+      console.log("DATA FROM UPLOADING");
+      console.log(data);
       loader.dismiss();
       let toast = this.toastCtrl.create({
         message: 'Finished uploading scans!',
@@ -70,6 +72,8 @@ export class SettingsPage {
       toast.present();
       this.getPendingCount();
     }, (err) => {
+      console.log("ERROR FROM UPLOADING");
+      console.log(err);
       loader.dismiss();
       let toast = this.toastCtrl.create({
         message: err,
@@ -130,6 +134,39 @@ export class SettingsPage {
   getPendingCount() {
     this.saveService.count('?uploaded=no').subscribe((data) => {      
         this.pendingUploads = data.Count;
+    });
+  }
+
+  // Resync ALL Scans
+  resyncAllScans() {
+    let loader = this.loadingCtrl.create({
+      content: 'Uploading all scans',
+      dismissOnPageChange: true
+    });
+    loader.present();
+
+    this.saveService.uploadAll().subscribe((data) => {
+      console.log("DATA FROM UPLOADING");
+      console.log(data);
+      loader.dismiss();
+      let toast = this.toastCtrl.create({
+        message: 'Finished uploading everything!',
+        duration: 2500,
+        position: 'top'
+      });
+      toast.present();
+      this.getPendingCount();
+    }, (err) => {
+      console.log("ERROR FROM UPLOADING");
+      console.log(err);
+      loader.dismiss();
+      let toast = this.toastCtrl.create({
+        message: err.msg || err,
+        duration: 2500,
+        position: 'top'
+      });
+      toast.present();
+      this.getPendingCount();
     });
   }
 }

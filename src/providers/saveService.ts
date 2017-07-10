@@ -8,15 +8,19 @@ import 'rxjs/add/observable/forkJoin'
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
 
+import * as moment from 'moment';
+
 import { InfoService } from './infoService';
 
 import { LeadSourceGuid } from '../helpers/leadSourceGuid';
+import { apiCreds } from '../config/apiCreds';
 
 @Injectable()
 export class SaveService {
 
     private prefix = 'http://localhost/leadsources/';
     private backgroundInterval: any = null;
+    private turnoutURL = 'https://apis.turnoutnow.com/attendee-mapping/post';
 
     constructor(
         private http: Http,
@@ -109,7 +113,7 @@ export class SaveService {
                 };
                 let resp = lead.Responses;
                 resp.push({"Tag": "lcBadgeId", "Value": scanObj.badge });
-                resp.push({"Tag":  "lcRFID", "Value": scanObj.rfid });
+                resp.push({"Tag": "lcRFID", "Value": scanObj.rfid });
                 resp.push({"Tag": "lcLastScanBy", "Value": scanObj.user});
                 resp.push({"Tag": "lcUnmapped", "Value": scanObj.fullBadge });
                 resp.push({"Tag": "lcConvertedBadge", "Value": this.convertValidarBadgeToUpload(scanObj.fullBadge, scanObj.badge ) });
@@ -224,21 +228,35 @@ export class SaveService {
         this.uploadPending().subscribe((data) => { }, (err) => { });
     }    
 
-    // Uploading any pending scans
-    // TODO -- UPLOAD TO 3rd Party Service!!!
-    uploadPending() {
-        if (!window.navigator.onLine) {
-            return Observable.throw("Please check your internet connection");
-        }
+    // Re-upload all scans
+    uploadAll() {
+        return this.uploadPending(true);
+    }
 
-        return this.find('uploaded=no&error=no')
+    // Uploading any pending scans
+    uploadPending(all?) {
+        if (!window.navigator.onLine) {
+            return Observable.throw({error: true, msg: "Please check your internet connection"});
+        }
+        const q = all ? 'error=no' : 'uploaded=no&error=no';
+        return this.find(q)
             .flatMap((data) => {
+                if (!data || data.length === 0) {
+                    return Observable.throw({
+                        error: true,
+                        msg: "No pending uploads..."
+                    });
+                }
+                return this.uploadToAssociation(data);
+            })
+            .flatMap((data) => {
+                console.log(data);
                 let leads = data,
                     requests = [],
                     i = 0,
                     len = leads.length;
                 for(; i < len; i++) {
-                    requests.push(this.upload(leads[i]));
+                    requests.push(this.uploadToValidar(leads[i]));
                 }
                 if (len === 0) {
                     return Observable.of([]);
@@ -249,8 +267,31 @@ export class SaveService {
             });
     }
 
-    // Upload single lead
-    upload(lead) {
+    // Upload to 3rd Party
+    private uploadToAssociation(leads) {
+        let leadsToUpload = [];
+        let headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        headers.append('apikey', apiCreds.apiKey);
+        let associateObj = {
+            EventID: apiCreds.eventId,
+            Mapping: []
+        };
+        for(let i = 0, j = leads.length; i < j; i++) {
+            let person = this.convertLeadToMapObject(leads[i]);
+            if (person) {
+                associateObj.Mapping.push(person);
+                leadsToUpload.push(leads[i]);
+            }
+        }
+        console.log(associateObj);
+        return this.http.post(this.turnoutURL, associateObj, { headers }).map(res => res.json()).flatMap(() => {
+            return Observable.of(leadsToUpload);
+        });
+    }
+
+    // Upload single lead to Validar
+    private uploadToValidar(lead) {
         let seat = null;
         return this.infoService.getSeat()
         .flatMap((newSeat) => {
@@ -281,10 +322,37 @@ export class SaveService {
                 })
                 .catch((err) => {
                     if (err && err.Fault && err.Fault.Type === 'InvalidSessionFault') {
-                        return this.infoService.updateToken().flatMap(() => this.upload(lead));
+                        return this.infoService.updateToken().flatMap(() => this.uploadToValidar(lead));
                     }
                     return Observable.throw(err);
                 });
         });
+    }
+
+    // Convert database lead to mapping object to upload to 3rd party
+    private convertLeadToMapObject(lead) {
+        console.log(lead.LastVisitDateTime);
+        let time = moment.utc(lead.LastVisitDateTime).toDate();
+        const obj = {
+            IsDeleted: 0,
+            Badge: this.getTagValue(lead.Responses, 'lcConvertedBadge'),
+            Beacon: this.getTagValue(lead.Responses, 'lcRFID'),
+            Time: moment(time).format('YYYY-MM-DD HH:mm:ss.SSS')
+        };
+
+        if (obj.Badge && obj.Beacon ) {
+            return obj;
+        }
+        return false;
+    }
+
+    // Helper to get 'Tag' value from Responses array
+    private getTagValue(arr, tag) {
+        let i = 0, j = arr.length;
+        for (; i < j; i++) {
+            if ("object" == typeof arr[i] && arr[i]['Tag'] === tag) {
+                return arr[i].Value;
+            }
+        }
     }
 }

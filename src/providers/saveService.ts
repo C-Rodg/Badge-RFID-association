@@ -157,7 +157,7 @@ export class SaveService {
             }
             return [id, first, last, company].join('^');            
         } else if (scanData === id) {
-            return [id, first, last, company].join('^'); 
+            return id;
         } else {
             return "UPLOAD CONVERTER IS NOT SUPPORTED FOR THIS BADGE TYPE";
         }

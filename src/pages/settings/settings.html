@@ -61,11 +61,13 @@
         <ion-icon name="ios-information-circle-outline"></ion-icon>
       </ion-col>
       <ion-col center padding-left>
-        <h1>About</h1>
+        <h1>About</h1>                
         <p class="secondary-text">{{ aboutDevice.appInfo }}</p>
         <p class="secondary-text">{{ aboutDevice.deviceInfo }}</p>
         <p class="secondary-text">Sled-scanner: {{ aboutDevice.scannerStatus }}</p>
         <p class="secondary-text">Cameras: front <ion-icon name="{{'ios-' + aboutDevice.cameraFront }}"></ion-icon> | back <ion-icon name="{{'ios-' + aboutDevice.cameraBack }}"></ion-icon></p>
+        <p class="secondary-text tiny-text">Event ID: {{ aboutDevice.eventId }}</p>
+        <p class="secondary-text tiny-text">Api Key: {{ aboutDevice.apiKey }}</p>
       </ion-col>
     </ion-row>
   </ion-card>

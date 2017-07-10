@@ -36,3 +36,4 @@ UserInterfaceState.xcuserstate
 
 # Validar Configs
 src/config/leadsourcerecorddefinition.xml
+src/config/apiCreds.ts

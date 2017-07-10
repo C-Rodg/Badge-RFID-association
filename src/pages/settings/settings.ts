@@ -5,6 +5,9 @@ import { SettingsService } from '../../providers/settingsService';
 import { InfoService } from '../../providers/infoService';
 import { SaveService } from '../../providers/saveService';
 
+import { apiCreds } from '../../config/apiCreds';
+console.log(apiCreds);
+
 @Component({
   selector: 'page-settings',
   templateUrl: 'settings.html'
@@ -12,6 +15,8 @@ import { SaveService } from '../../providers/saveService';
 export class SettingsPage {
 
   aboutDevice : any = {
+    apiKey: apiCreds.apiKey,
+    eventId: apiCreds.eventId,
     appInfo: "",
     deviceInfo: "",
     scannerStatus: "disconnected",

@@ -21,7 +21,7 @@ export class SaveService {
     constructor(
         private http: Http,
         private infoService: InfoService
-    ) { }
+    ) { }    
 
     // Start Saving a pair of scans
     startSave(scanObj) {
@@ -80,6 +80,16 @@ export class SaveService {
                 } else {
                     lead.Responses.push({ Tag: 'lcUnmapped', Value: scanObj.fullBadge });
                 }
+                if (lead.Responses.filter(r => r.Tag === 'lcConvertedBadge').length > 0) {
+                    let i = 0, j = lead.Responses.length;
+                    for(; i < j; i++) {
+                        if (lead.Responses[i].Tag === 'lcConvertedBadge') {
+                            lead.Responses[i].Value = this.convertValidarBadgeToUpload(scanObj.fullBadge, scanObj.badge);
+                        }
+                    }
+                } else {
+                    lead.Responses.push({ Tag: 'lcConvertedBadge', Value: this.convertValidarBadgeToUpload(scanObj.fullBadge, scanObj.badge )});
+                }
                 return this.saveVisit(visit).flatMap(() => {
                     return this.saveReturning(lead, data[0].LeadGuid);
                 });
@@ -102,6 +112,7 @@ export class SaveService {
                 resp.push({"Tag":  "lcRFID", "Value": scanObj.rfid });
                 resp.push({"Tag": "lcLastScanBy", "Value": scanObj.user});
                 resp.push({"Tag": "lcUnmapped", "Value": scanObj.fullBadge });
+                resp.push({"Tag": "lcConvertedBadge", "Value": this.convertValidarBadgeToUpload(scanObj.fullBadge, scanObj.badge ) });
 
                 return this.saveNew(lead).flatMap((person) => {
                     lead["LeadGuid"] = person.LeadGuid;
@@ -114,6 +125,38 @@ export class SaveService {
                 });
             }
         });
+    }
+
+    // Convert Validar Badge Format to Upload Format
+    // TODO: HANDLE DIFFERENTLY IF PDF417 badges
+    convertValidarBadgeToUpload(scanData, id) {
+        let scanStr = null, scanArr = [];
+        let first = '', last = '', company = '';
+        if (scanData != null && scanData.substring(0,4) === 'VQC:') {
+            scanStr = scanData.substring(4);
+            scanArr = scanStr.split(';');
+            if (scanArr != null) {
+                for (let i = 0, j = scanArr.length; i < j; i++) {
+                    let field = scanArr[i].split(':');
+                    if (field != null && field.length > 0) {
+                        if (field[0] === 'ID') {
+
+                        } else if (field[0] === 'FN') {
+                            first = field[1];
+                        } else if (field[0] === 'LN') {
+                            last = field[1];
+                        } else if (field[0] === 'CO') {
+                            company = field[1];
+                        }
+                    }
+                }
+            }
+            return [id, first, last, company].join('^');            
+        } else if (scanData === id) {
+            return [id, first, last, company].join('^'); 
+        } else {
+            return "UPLOAD CONVERTER IS NOT SUPPORTED FOR THIS BADGE TYPE";
+        }
     }
 
     // Find leads

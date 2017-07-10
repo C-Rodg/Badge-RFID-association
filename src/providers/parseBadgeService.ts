@@ -47,24 +47,26 @@ export class ParseBadgeService {
         if (scannedFields.length > 0 && scannedFields[0]) {     // Assuming badgeId is index 0
             return Observable.of({
                 type: 'BADGE',
-                val: scannedFields[0]
+                val: scannedFields[0],
+                full: scannedData
             });
         }
         return this.throwError("Empty PDF417");
     }
 
-    // Parse 3 of 9 badges -- assuming RFID will never be 3 of 9 only Validar badges
+    // Parse 3 of 9 badges -- assuming RFID will never be 3 of 9, only Validar badges
     private parse39(scannedData) {
         if (scannedData != null) {
             return Observable.of({
                 type: 'BADGE',
-                val: scannedData
+                val: scannedData,
+                full: scannedData
             });
         }
         return this.throwError('Empty 3 of 9 barcode');
     }
 
-    // Parse QR code / Code 3 of 9
+    // Parse QR code
     private parseQR(scannedData) {
         let scannedFields = null;
         
@@ -78,7 +80,8 @@ export class ParseBadgeService {
                         if (field[0] === 'ID') {
                             return Observable.of({
                                 type: 'BADGE',
-                                val: field[1]
+                                val: field[1],
+                                full: scannedData
                             });
                         }
                     }
@@ -90,7 +93,8 @@ export class ParseBadgeService {
             if (scannedFields != null) {
                 return Observable.of({
                     type: 'BADGE',
-                    val: scannedFields[0]
+                    val: scannedFields[0],
+                    full: scannedData
                 });
             }
             return this.throwError('Invalid QR code format');

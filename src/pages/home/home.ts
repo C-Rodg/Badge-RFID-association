@@ -15,6 +15,7 @@ import { SaveService } from '../../providers/saveService';
 export class HomePage {
   
   valueBadge: string = "";
+  fullBadge: string = "";
   valueRFID: string = "";
 
   constructor(
@@ -64,6 +65,7 @@ export class HomePage {
         // Assign new scan data
         if (d.type === 'BADGE') {
           this.valueBadge = d.val;
+          this.fullBadge = d.full;
         } else if (d.type === 'RFID') {
           this.valueRFID = d.val;
         } else {          
@@ -76,11 +78,12 @@ export class HomePage {
         this.soundService.playScan();
 
         // Check if both scans are present
-        if (this.valueBadge && this.valueRFID) {
+        if (this.valueBadge && this.valueRFID && this.fullBadge) {
           // Save data and play accepted noise
           const saveObj = {
             badge: this.valueBadge,
             rfid: this.valueRFID,
+            fullBadge: this.fullBadge,
             station: this.infoService.client.ClientName,
             device: this.infoService.client.DeviceType,
             user: this.settingsService.currentUser || this.infoService.client.ClientName

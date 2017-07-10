@@ -67,6 +67,18 @@ export class SaveService {
                             lead.Responses[i].Value = scanObj.user;
                         }
                     }
+                } else {
+                    lead.Responses.push({ Tag: 'lcLastScanBy', Value: scanObj.user});
+                }
+                if (lead.Responses.filter(r => r.Tag === 'lcUnmapped').length > 0) {
+                    let i = 0, j = lead.Responses.length;
+                    for(; i < j; i++) {
+                        if (lead.Responses[i].Tag === 'lcUnmapped') {
+                            lead.Responses[i].Value = scanObj.fullBadge;
+                        }
+                    }
+                } else {
+                    lead.Responses.push({ Tag: 'lcUnmapped', Value: scanObj.fullBadge });
                 }
                 return this.saveVisit(visit).flatMap(() => {
                     return this.saveReturning(lead, data[0].LeadGuid);
@@ -89,6 +101,7 @@ export class SaveService {
                 resp.push({"Tag": "lcBadgeId", "Value": scanObj.badge });
                 resp.push({"Tag":  "lcRFID", "Value": scanObj.rfid });
                 resp.push({"Tag": "lcLastScanBy", "Value": scanObj.user});
+                resp.push({"Tag": "lcUnmapped", "Value": scanObj.fullBadge });
 
                 return this.saveNew(lead).flatMap((person) => {
                     lead["LeadGuid"] = person.LeadGuid;
